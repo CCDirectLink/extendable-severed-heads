@@ -1,5 +1,6 @@
 {
 	"name": "extendable-severed-heads",
 	"hidden": true,
+	"version": "1.0.0",
 	"plugin": "plugin.js"
 }
