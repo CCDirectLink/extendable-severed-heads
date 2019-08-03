@@ -22,26 +22,28 @@ export default class ExtendableHeads extends Plugin  {
 			}
 		}
 
-		let dim = this.getTotalDim(imgs);
-		
-		const newImage = await this.mergeImages(imgs, dim);
-		dim = this.getTotalDim([newImage]);
+		const newImage = await this.mergeImages(imgs);
+		const dim = this.getTotalDim([newImage]);
 
 		
 		const startIndex = this.calcStartIndex(dim, headIdx);
 
+		
+
+		
+		
 		const customIdx = {};
 
 		for (let index = 0; index < headIdx.length; ++index) {
 			const head = headIdx[index];
 			customIdx[head.id] = startIndex + index;
 		}
-
 		sc.PlayerConfig.inject({
 			onload: function(config) {
 				if (!config.jsonTEMPLATES) {
 					const id = config.character;
 					if (id in customIdx) {
+						
 						config.headIdx = customIdx[id];
 					}
 				}
@@ -49,6 +51,15 @@ export default class ExtendableHeads extends Plugin  {
 			}
 		});
 
+		sc.SaveSlotParty.inject({
+			setParty: function({player}) {
+				try {
+					this.party[0] = sc.party.models[player.playerConfig].getHeadIdx();
+				} catch (e) {}
+				
+				return this.parent.apply(this, arguments);
+			}
+		});
 
 		const img = new ig.Image("media/gui/severed-heads.png");
 		img.addLoadListener({
@@ -56,6 +67,9 @@ export default class ExtendableHeads extends Plugin  {
 				// replace image
 				if (loaded) {
 					if (!image.failed) {
+						image.width = newImage.width;
+						image.height = newImage.height;
+						
 						image.data = newImage;
 					}
 					
@@ -93,25 +107,37 @@ export default class ExtendableHeads extends Plugin  {
 		}
 		return dim;
 	}
-	async mergeImages(imgs, dim) {
+	async mergeImages(imgs) {
 		const canvas = document.createElement("canvas");
 		
 		
 		// preset canvas
 
 		// normalize the width
-		canvas.width = (24 - (dim.x%24)) + dim.x;
-		canvas.height = dim.y;
+
+		// calculate the true width
+
+		let width = 0;
+		const xPos = [];
+		for (const img of imgs) {
+			xPos.push(width);
+			const remainder = (24 - (img.width%24));
+			if (remainder%24 === 0) {
+				width += img.width;
+			} else {
+				// round up
+				width += img.width + remainder;
+			}
+		}
+
+		canvas.width = width;
+		canvas.height = 24;
 		const ctx = canvas.getContext("2d");
-		let x = 0;
 
 		// want to go by a factor of 24
 		// go one by one
 		for (const img of imgs) {
-			ctx.drawImage(img, x, 0);
-			// this will normalize the dimensions
-			const remainder = (24 - (img.width%24));
-			x += img.width + remainder;
+			ctx.drawImage(img, xPos.shift(), 0);			
 		}
 		return await this.loadImage(canvas.toDataURL("image/png"));
 	}
