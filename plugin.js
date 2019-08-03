@@ -49,7 +49,7 @@ export default class ExtendableHeads extends Plugin  {
 			}
 		});
 
-		// calculate the startIndex
+
 		const img = new ig.Image("media/gui/severed-heads.png");
 		img.addLoadListener({
 			onLoadableComplete: function(loaded, image) {
@@ -62,8 +62,6 @@ export default class ExtendableHeads extends Plugin  {
 				}
 			}
 		});
-
-		// console.log(imgData);
 
 	}
 	async loadImage(src) {
