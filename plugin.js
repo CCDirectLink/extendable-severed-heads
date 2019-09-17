@@ -61,6 +61,21 @@ export default class ExtendableHeads extends Plugin  {
 			}
 		});
 
+
+		sc.CombatUpperHud.inject({
+			init: function() {
+				this.parent();
+				const pvp = this.sub.pvp;
+				const old = pvp._renderHeads;
+				pvp._renderHeads = function(renderer, x, flip, idxArr) {
+					if (flip) {
+						idxArr[0] = sc.model.player.config.headIdx;
+					}
+					return old.apply(this, arguments);
+				}
+			}
+		});
+
 		const img = new ig.Image("media/gui/severed-heads.png");
 		img.addLoadListener({
 			onLoadableComplete: function(loaded, image) {
