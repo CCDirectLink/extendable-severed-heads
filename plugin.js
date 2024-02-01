@@ -33,14 +33,14 @@ export default class ExtendableHeads extends Plugin  {
 		
 		
 		const customIdx = {};
-		const customNameMapping = {};
+		let customNameMapping = {};
 
 		for (let index = 0; index < headIdx.length; ++index) {
 			const head = headIdx[index];
 			customIdx[head.id] = startIndex + index;
 			if(head.name) {
 				if(head.name in customNameMapping) {
-					console.warn(`Warning: duplicate name entry for custom head ${head.name}`);
+					console.warn(`Warning: duplicate name entry "${head.name}" for custom head of ${head.id}`);
 				} else {
 					customNameMapping[head.name] = startIndex + index;
 				}
@@ -84,13 +84,22 @@ export default class ExtendableHeads extends Plugin  {
 			}
 		});
 
+		function customNameToHeadIdx(headIdx) {
+			if(typeof headIdx == "string" && headIdx in customNameMapping) {
+				return customNameMapping[headIdx];
+			}
+			return headIdx;
+		}
+
+		sc.PartyMemberModel.inject({
+			getHeadIdx() {
+				return customNameToHeadIdx(this.parent())
+			}
+		})
+		
 		ig.ENTITY.Enemy.inject({
 			getHeadIdx() {
-				let headIdx = this.parent();
-				if(typeof headIdx == "string" && headIdx in customNameMapping) {
-					return customNameMapping[headIdx]
-				}
-				return headIdx;
+				return customNameToHeadIdx(this.parent())
 			}
 		})
 
@@ -194,5 +203,4 @@ export default class ExtendableHeads extends Plugin  {
 			})
 		});
 	}
-
 }
