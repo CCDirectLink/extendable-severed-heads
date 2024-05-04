@@ -1,5 +1,9 @@
-export default class ExtendableHeads extends Plugin {
-	async prestart() {
+export default class ExtendableHeads {
+	prestart() {
+		this.initPrestart();
+	}
+
+	async initPrestart() {
 		// Image loaded successfully
 		const oldImage = await this.loadImage("media/gui/severed-heads.png");
 
@@ -65,7 +69,7 @@ export default class ExtendableHeads extends Plugin {
 				this.parent();
 				const pvp = this.sub.pvp;
 				const old = pvp._renderHeads;
-				pvp._renderHeads = function (renderer, x, flip, idxArr) {
+				pvp._renderHeads = function (_renderer, _x, flip, idxArr) {
 					if (flip) {
 						idxArr[0] = sc.model.player.config.headIdx;
 					}
