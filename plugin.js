@@ -113,8 +113,11 @@ export default class ExtendableHeads {
 		});
 	}
 	async loadImage(src) {
-		let imgData = new Image();
+		if ('ccmod' in window && !src.startsWith('data:')) {
+			return await ccmod.resources.loadImage(src);
+		}
 
+		let imgData = new Image;
 		await new Promise((resolve, reject) => {
 			imgData.onload = () => {
 				resolve();
@@ -180,6 +183,10 @@ export default class ExtendableHeads {
 	}
 
 	getHeadIdx() {
+		if ('ccmod' in window) {
+			return ccmod.resources.loadJSON('data/players/headIdx.json');
+		}
+
 		return new Promise((resolve, reject) => {
 			$.ajax({
 				dataType: "json",
@@ -194,4 +201,3 @@ export default class ExtendableHeads {
 		});
 	}
 }
-
